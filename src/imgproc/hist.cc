@@ -13,7 +13,11 @@ namespace ncv {
     }
 
     NAN_METHOD(CompareHist) {
-      NotImplemented(info);
+		FUNCTION_REQUIRE_ARGUMENTS(3);
+		ASSERT_INPUTARRAY_FROM_ARGS(H1, 0);
+		ASSERT_INPUTARRAY_FROM_ARGS(H2, 1);
+		ASSERT_INTARRAY_FROM_ARGS(method, 2);
+		TRY_CATCH_THROW_OPENCV(cv:compareHist(H1, H2, method));
     }
 
     NAN_METHOD(EMD) {
@@ -28,7 +32,12 @@ namespace ncv {
     }
 
     NAN_METHOD(WrapperEMD) {
-      NotImplemented(info);
+		FUCTION_REQUIRED_ARGUMENTS_RANGE(3, 6);
+		ASSERT_INPUTARRAY_FROM_ARGS(signature1, 0);
+		ASSERT_INPUTARRAY_FROM_ARGS(signature2, 1);
+		ASSERT_INT_FROM_ARGS(distType, 2);
+		DEFAULT_INPUTARRAY_FROM_ARGS(cost, 3, cv::cost = noArray());
+		//
     }
 
     void HistInit(Local<Object> &target) {

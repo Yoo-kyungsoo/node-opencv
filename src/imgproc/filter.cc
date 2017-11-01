@@ -85,7 +85,12 @@ namespace ncv {
     }
 
     NAN_METHOD(BuildPyramid) {
-      NotImplemented(info);
+		FUNCTION_REQUIRE_ARGUMENTS_RANGE(3, 4);
+		ASSERT_INPUTARRAY_FROM_ARGS(src, 0);
+		ASSERT_OUTPUTARRAY_FROM_ARGS(dst, 1);
+		ASSERT_INT_FROM_ARGS(maxlevel, 2);
+		DEFAULT_INT_FROM_ARGS(borderType, 3, cv::BORDER_DEFAULT);
+		TRY_CATCH_THROW_OPENCV(cv::BuildPyramid(src, dst, maxlevel, borderType));
     }
 
     NAN_METHOD(Dilate) {

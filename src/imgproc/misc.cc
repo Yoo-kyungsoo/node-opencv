@@ -1,4 +1,7 @@
 #include "misc.h"
+#include "../core/Point.h"
+#include "../core/Scalar.h"
+#include "../core/Rect.h"
 
 namespace ncv {
 
@@ -12,7 +15,7 @@ namespace ncv {
       ASSERT_DOUBLE_FROM_ARGS(maxval, 2);
       ASSERT_INT_FROM_ARGS(adaptiveMethod, 3);
       ASSERT_INT_FROM_ARGS(adaptiveType, 4);
-      ASSERT_INT_FROM_ARGS(blockSize, 5);
+      ASSERT_INT_FROM_ARGS(blockSize, 5);   
       ASSERT_DOUBLE_FROM_ARGS(C, 6);
       TRY_CATCH_THROW_OPENCV(cv::adaptiveThreshold(src, dst, maxval, adaptiveMethod, adaptiveType, blockSize, C));
     }
@@ -28,20 +31,110 @@ namespace ncv {
     }
 
     NAN_METHOD(DistanceTransform) {
-      NotImplemented(info);
+		FUNCTION_REQUIRE_ARGUMENTS_RANGE(5, 6);
+		ASSERT_INPUTARRAY_FROM_ARGS(src, 0);
+		ASSERT_OUTPUTARRAY_FROM_ARGS(dst, 1);
+		ASSERT_OUTPUTARRAY_FROM_ARGS(labels, 2);
+		ASSERT_INPUTARRAY_FROM_ARGS(distanceType, 3);
+		ASSERT_INPUTARRAY_FROM_ARGS(maskSize, 4);
+		DEFAULT_INPUTARRAY_FROM_ARGS(labelType, 5, cv::DIST_LABEL_CCOMP);   // cv:: is not available
+		TRY_CATCH_THROW_OPENCV(cv::DistanceTransform(src, dst, labels, distanceType, maskSize, labelType));
     }
 
     NAN_METHOD(FloodFill) {
-      NotImplemented(info);
+		FUNCTION_REQUIRE_ARGUMENTS_RANGE(3, 7);
+		ASSERT_INPUTOUTPUTARRAY_FROM_ARGS(image, 0);
+		cv::_InputOutputArray mask;
+		int argumentsOffset = 0;
+		if (Point::HasInstance(info[1])) {
+			ASSERT_INPUTOUTPUTARRAY_FROM_ARGS(_mask, 1);
+			mask = _mask;
+		}
+		ASSERT_POINT_FROM_ARGS(seedPoint, 1 + argumentsOffset);
+		ASSERT_SCALAR_FROM_ARGS(newVal, 2 + argumentsOffset);
+		DEFAULT_SCALAR_FROM_ARGS(loDiff, 3 + argumentsOffset, cv::Scalar());
+		DEFAULT_SCALAR_FROM_ARGS(upDiff, 4 + argumentsOffset, cv::Scalar());
+		DEFAULT_INT_FROM_ARGS(flags, 5 + argumentsOffset, 4);
+
+		cv::Rect rect;
+		int result;
+		TRY_CATCH_THROW_OPENCV(result = cv::floodFill(image, mask, seedPoint, newVal, &rect, loDiff, upDiff, flags));
+
+		Local<Object> ret = Nan::New<Object>();
+		Nan::Set(ret, Nan::New<String>("result").ToLocalChecked(), Nan::New<Number>(result));
+		Nan::Set(ret, Nan::New<String>("rect").ToLocalChecked(), Rect::NewInstance(rect));
+
+		info.GetReturnValue().Set(ret);
     }
 
     NAN_METHOD(GrabCut) {
-      NotImplemented(info);
+		FUNCTION_REQUIRE_ARGUMENTS_RANGE(6, 7);
+		ASSERT_INPUTARRAY_FROM_ARGS(img, 0);
+		ASSERT_INPUTOUTPUTARRAY_FROM_ARGS(mask, 1);
+		ASSERT_RECT_FROM_ARGS(rect, 2);
+		ASSERT_INPUTOUTPUTARRAY_FROM_ARGS(bgdModel, 3);
+		ASSERT_INPUTOUTPUTARRAY_FROM_ARGS(fgdModel, 4);
+		ASSERT_INT_FROM_ARGS(iterCount, 5);
+		DEFAULT_INT_FROM_ARGS(mode, 6, cv::GC_EVAL);
+		TRY_CATCH_THROW_OPENCV(cv::grabCut(img, mask, rect, bgdModel, fgdModel, iterCount, mode));
+		
     }
 
     NAN_METHOD(Integral) {
-      NotImplemented(info);
-    }
+		FUNCTION_REQUIRE_ARGUMENTS_RANGE(2, 6);
+		ASSERT_INPUTARRAY_FROM_ARGS(src, 0);
+		ASSERT_OUTPUTARRAY_FROM_ARGS(sum, 1);
+		cv::_OutputArray sqsum = cv::noArray(), tilted = cv::noArray();
+		int argumentOffset = 0;
+		if (info.Length() > 2 && !info[2]->IsNumber()) {
+			ASSERT_OUTPUTARRAY_FROM_ARGS(_sqsum, 2);
+			sqsum = _sqsum;
+			argumentOffset += 1;
+		}
+		if (info.Length() > 3 && !info[3]->IsNumber()) {
+			ASSERT_OUTPUTARRAY_FROM_ARGS(_tilted, 3);
+			tilted = _tilted;
+			argumentOffset += 1;
+		}
+		DEFAULT_INT_FROM_ARGS(sdepth, 2 + argumentOffset, -1);
+		DEFAULT_INT_FROM_ARGS(sdepth, 3 + argumentOffset, -1);
+		TRY_CATCH_THROW_OPENCV(cv::Integral(src, sum, sqsum, tilted, sdepth, sqdepth));
+		/*
+		//Type2
+		FUCNTION_REQUIRE_ARGUMENTS_RANGE(3, 5);
+		ASSERT_INPUTARRAY_FROM_ARGS(src,0);
+		ASSERT_OUTPUTARRAY_FROM_ARGS(sum,1);
+		ASSERT_OUTPUTARRAY_FROM_ARGS(sqsum,2);
+		DEFAULT_INT_FROM_ARGS(sdepth,3,cv::sdepth(-1));
+		DEFAULT_INT_FROM_ARGS(sdepth,3,cv::sqdepth(-1));
+		TRY_CATCH_THROW_OPENCV(cv::Integral(src, sum, sqsum, sdepth, sqdepth));
+
+		*/
+		/*
+		//Type 3
+		FUNCTION_REQUIRE_ARGUMENTS_RANGE(4, 6);
+		ASSERT_INPUTARRAY_FROM_ARGS(src ,0);
+	    ASSERT_OUTPUTARRAY_FROM_ARGS(sum ,1);
+		ASSERT_OUTPUTARRAY_FROM_ARGS(sqsum ,2);
+		ASSERT_OUTPUTARRAY_FROM_ARGS(tilted, 3);
+		DEFALUT_INT_FROM_ARGS(sdepth, 4, cv::sdepth(-1));
+		DEFALUT_INT_FROM_ARGS(sqdepth, 4, cv::sqdepth(-1));
+		TRY_CATCH_THROW_OPENCV(cv::Integral(src, sum, sqsum, tilted, sdepth, sqdepth ));
+
+		
+		*/
+
+
+
+		
+		
+		
+		
+		
+		
+		
+		
+	}
 
     NAN_METHOD(Threshold) {
       FUNCTION_REQUIRE_ARGUMENTS(5);

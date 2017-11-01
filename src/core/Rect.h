@@ -3,6 +3,20 @@
 
 #include "common.h"
 
+#define _TRY_CATCH_RECT_FROM_ARGS(NAME, IND, CATCH) \
+  cv::Rect NAME; \
+  try { \
+    NAME = Rect::RawRect(1, &info[IND]); \
+  } catch (const char *) { \
+    CATCH \
+  }
+
+#define ASSERT_RECT_FROM_ARGS(NAME, IND) \
+  _TRY_CATCH_RECT_FROM_ARGS(NAME, IND, return THROW_INVALID_ARGUMENT_TYPE(IND, "a Rect");)
+
+#define DEFAULT_RECT_FROM_ARGS(NAME, IND, DEF) \
+  _TRY_CATCH_RECT_FROM_ARGS(NAME, IND, NAME = DEF;)
+
 class NCV_CORE_EXTERN Rect : public Nan::ObjectWrap {
 private:
   static Nan::Persistent<FunctionTemplate> constructor;
